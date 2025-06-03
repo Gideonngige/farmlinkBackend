@@ -89,6 +89,19 @@ DATABASES = {
     }
 }
 
+# rensder DATABASE
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'farmlinkdb_684a',
+        'USER': 'farmlinkdb_684a_user',
+        'PASSWORD': 'ADjxYHbyHuDqv8mJG9DrOpwFTMJ9GHL3',
+        'HOST': 'dpg-d0vm5v0gjchc739u6stg-a.oregon-postgres.render.com',
+        'PORT': '5432',
+    }
+}
+
+# postgresql://farmlinkdb_684a_user:ADjxYHbyHuDqv8mJG9DrOpwFTMJ9GHL3@dpg-d0vm5v0gjchc739u6stg-a.oregon-postgres.render.com/farmlinkdb_684a
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
