@@ -51,7 +51,7 @@ def signup(request):
             uid = farmer['localId']
 
             # Save farmer in your database
-            farmer = Farmer(farmer_name=fullname, phone_number=phone_number email=email, area_of_residence=area_of_residence, password=uid)
+            farmer = Farmer(farmer_name=fullname, phone_number=phone_number, email=email, area_of_residence=area_of_residence, password=uid)
             farmer.save()
             
             farmer2 = Farmer.objects.filter(email=email).first()
