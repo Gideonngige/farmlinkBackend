@@ -4,7 +4,7 @@ import pyrebase
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Farmer, Notification
+from .models import Farmer, Notification, Question, Reply
 import json
 
 config = {
@@ -109,3 +109,126 @@ def signin(request):
 
     return JsonResponse({"message": "Invalid request method"}, status=405)
 #end of signin api
+
+# start of question api
+@csrf_exempt
+@api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser])
+def question(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            farmer_id = data.get("farmer_id")
+            question_text = data.get("question_text")
+
+            if not farmer_id or not question_text:
+                return JsonResponse({"message": "Farmer ID and question text are required"}, status=400)
+
+            farmer = Farmer.objects.filter(id=farmer_id).first()
+            if not farmer:
+                return JsonResponse({"message": "Farmer not found"}, status=404)
+
+            question = Question.objects.create(
+                farmer_id=farmer,
+                question_text=question_text
+            )
+
+            return JsonResponse({"message": "Question posted successfully", "question_id": question.id}, status=200)
+
+        except Exception as e:
+            print("Error:", str(e))
+            return JsonResponse({"message": "Failed to post question", "error": str(e)}, status=500)
+
+    return JsonResponse({"message": "Invalid request method"}, status=405)
+
+# end of question api
+
+# start of get questions api
+@csrf_exempt
+@api_view(['GET'])
+def get_questions(request):
+    if request.method == 'GET':
+        try:
+            questions = Question.objects.all().order_by('-created_at')
+            questions_list = []
+
+            for question in questions:
+                questions_list.append({
+                    "id": question.id,
+                    "farmer_id": question.farmer_id.id,
+                    "question_text": question.question_text,
+                    "farmer_name": question.farmer_id.farmer_name,
+                    "profile_image": question.farmer_id.profile_image,
+                    "created_at": question.created_at.strftime("%Y-%m-%d %H:%M:%S")
+                })
+
+            return JsonResponse({"questions": questions_list}, status=200)
+
+        except Exception as e:
+            print("Error:", str(e))
+            return JsonResponse({"message": "Failed to retrieve questions", "error": str(e)}, status=500)
+
+    return JsonResponse({"message": "Invalid request method"}, status=405)
+
+# start of reply api
+@csrf_exempt
+@api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser])
+def reply(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            farmer_id = data.get("farmer_id")
+            question_id = data.get("question_id")
+            reply_text = data.get("reply_text")
+
+            if not farmer_id or not reply_text:
+                return JsonResponse({"message": "Farmer ID and question text are required"}, status=400)
+
+            farmer = Farmer.objects.filter(id=farmer_id).first()
+            if not farmer:
+                return JsonResponse({"message": "Farmer not found"}, status=404)
+            question = Question.objects.filter(id=question_id).first()
+            if not question:
+                return JsonResponse({"message":"Question not found"}, status=404)
+
+            reply = Reply.objects.create(
+                question=question,
+                farmer_id=farmer,
+                reply_text=reply_text
+            )
+
+            return JsonResponse({"message": "Reply sent successfully", "reply_id": reply.id}, status=200)
+
+        except Exception as e:
+            print("Error:", str(e))
+            return JsonResponse({"message": "Failed to send reply", "error": str(e)}, status=500)
+
+    return JsonResponse({"message": "Invalid request method"}, status=405)
+
+# start get replies api
+@csrf_exempt
+@api_view(['GET'])
+def get_replies(request, question_id):
+    if request.method == 'GET':
+        try:
+            question = Question.objects.filter(id=question_id).first()
+            replies = Reply.objects.filter(question=question).order_by('-created_at')
+            replies_list = []
+
+            for reply in replies:
+                replies_list.append({
+                    "id": reply.id,
+                    "reply_text": reply.reply_text,
+                    "farmer_name": reply.farmer_id.farmer_name,
+                    "profile_image": reply.farmer_id.profile_image,
+                    "created_at": reply.created_at.strftime("%Y-%m-%d %H:%M:%S")
+                })
+
+            return JsonResponse({"replies": replies_list}, status=200)
+
+        except Exception as e:
+            print("Error:", str(e))
+            return JsonResponse({"message": "Failed to retrieve replies", "error": str(e)}, status=500)
+
+    return JsonResponse({"message": "Invalid request method"}, status=405)

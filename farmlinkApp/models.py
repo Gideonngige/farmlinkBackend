@@ -29,3 +29,20 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification {self.id} for {self.farmer_id.name}"
+
+class Question(models.Model):
+    farmer_id = models.ForeignKey(Farmer, on_delete=models.CASCADE, related_name='questions')
+    question_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Question {self.id} by {self.farmer_id.farmer_name}"
+
+class Reply(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='replies')
+    farmer_id = models.ForeignKey(Farmer, on_delete=models.CASCADE, related_name='replies')
+    reply_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Reply {self.id} to Question {self.question.id} by {self.farmer_id.farmer_name}"
