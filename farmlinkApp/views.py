@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Farmer, Notification
+import json
 
 config = {
     "apiKey": "AIzaSyBFKJy-P2S8xHcB0DB5G-IUZ2hPgQ6VtEw",
@@ -71,3 +72,40 @@ def signup(request):
     return JsonResponse({"message": "Invalid request method"}, status=405)
 
 #end of signup api
+
+#start of signin api
+@csrf_exempt
+@api_view(['POST'])
+def signin(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            email = data.get("email")
+            password = data.get("password")
+
+            if not email or not password:
+                return JsonResponse({"message": "Email and password are required"}, status=400)
+
+            farmer = authe.sign_in_with_email_and_password(email, password)
+            
+            if Farmer.objects.filter(email=email).exists():
+                session_id = farmer['idToken']
+                request.session['uid'] = str(session_id)
+                get_farmer = Farmer.objects.filter(email=email).first()
+                farmer_id = get_farmer.id
+                print("Farmer ID:", farmer_id)  # Optional logging
+                farmer_name = get_farmer.farmer_name
+                phone_number = get_farmer.phone_number
+                area_of_residence = get_farmer.area_of_residence
+                profile_image = get_farmer.profile_image
+                date_joined = get_farmer.date_joined
+                return JsonResponse({"message": "Successfully logged in", "farmer_id":farmer_id, "farmer_name":farmer_name,"farmer_email":email,"phone_number":phone_number, "area_of_resident":area_of_residence, "profile_image":profile_image, "date_joined":date_joined}, status=200)
+            else:
+                return JsonResponse({"message": "No user found with this email, please register"}, status=404)
+
+        except Exception as e:
+            print("Error:", str(e))  # Optional logging
+            return JsonResponse({"message": "Invalid credentials. Please check your email and password."}, status=401)
+
+    return JsonResponse({"message": "Invalid request method"}, status=405)
+#end of signin api
