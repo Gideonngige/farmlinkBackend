@@ -46,3 +46,14 @@ class Reply(models.Model):
 
     def __str__(self):
         return f"Reply {self.id} to Question {self.question.id} by {self.farmer_id.farmer_name}"
+
+class Product(models.Model):
+    farmer_id = models.ForeignKey(Farmer, on_delete=models.CASCADE, related_name='product')
+    product_name = models.CharField(max_length=100)
+    product_image = models.URLField(max_length=200, blank=True, null=True, default='https://res.cloudinary.com/dc68huvjj/image/upload/v1748119193/zzy3zwrius3kjrzp4ifc.png')
+    description = models.TextField()
+    quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.product_name} ksh{self.price} by {self.farmer_id.farmer_name}"

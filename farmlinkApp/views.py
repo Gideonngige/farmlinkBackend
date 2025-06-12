@@ -4,8 +4,9 @@ import pyrebase
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Farmer, Notification, Question, Reply
+from .models import Farmer, Notification, Question, Reply, Product
 import json
+import cloudinary.uploader
 
 config = {
     "apiKey": "AIzaSyBFKJy-P2S8xHcB0DB5G-IUZ2hPgQ6VtEw",
@@ -232,3 +233,42 @@ def get_replies(request, question_id):
             return JsonResponse({"message": "Failed to retrieve replies", "error": str(e)}, status=500)
 
     return JsonResponse({"message": "Invalid request method"}, status=405)
+
+
+@api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser])
+def sell_product(request):
+    if request.method == 'POST':
+        try:
+            farmer_id = request.POST.get("farmer_id")
+            product_name = request.POST.get("product_name")
+            product_image = request.FILES.get("product_image")
+            description = request.POST.get("description")
+            quantity = request.POST.get("quantity")
+            price = request.POST.get("price")
+
+            print(farmer_id, product_name, product_image, description, quantity, price)
+            
+
+            if not all([farmer_id, product_name, product_image, description, quantity, price]):
+                return JsonResponse({"message": "All fields are required"}, status=400)
+
+            # Create the product
+            result = cloudinary.uploader.upload(product_image)
+            image_url = result.get('secure_url')
+             
+            farmer = Farmer.objects.filter(id=farmer_id).first()
+            product = Product.objects.create(
+                farmer_id = farmer,
+                product_name=product_name,
+                product_image=image_url,
+                description=description,
+                quantity=quantity,
+                price=price,
+            )
+
+            return JsonResponse({"message": "Product posted successfully", "product_id": product.id}, status=201)
+
+        except Exception as e:
+            print("Error:", str(e))
+            return JsonResponse({"message": "An error occurred", "error": str(e)}, status=500)
