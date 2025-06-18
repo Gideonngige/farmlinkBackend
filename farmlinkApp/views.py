@@ -272,3 +272,23 @@ def sell_product(request):
         except Exception as e:
             print("Error:", str(e))
             return JsonResponse({"message": "An error occurred", "error": str(e)}, status=500)
+
+# start of get farm product api
+def get_products(request, product_name):
+    try:
+        products = Product.objects.filter(product_name=product_name)
+        product_list = []
+        for product in products:
+            product_list.append({
+                'id': product.id,
+                'farmer_id':product.farmer_id.id,
+                'product_name': product.product_name,
+                'description': product.description,
+                'quantity': product.quantity,
+                'price': str(product.price),
+                'product_image': product.product_image,
+            })
+        return JsonResponse({"products": product_list}, status=200)
+    except Exception as e:
+        print("Error:", str(e))
+        return JsonResponse({"message": "An error occurred", "error": str(e)}, status=500)
