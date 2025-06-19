@@ -28,7 +28,7 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Notification {self.id} for {self.farmer_id.name}"
+        return f"Notification {self.id} for {self.farmer_id.farmer_name}"
 
 class Question(models.Model):
     farmer_id = models.ForeignKey(Farmer, on_delete=models.CASCADE, related_name='questions')

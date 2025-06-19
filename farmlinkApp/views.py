@@ -7,6 +7,8 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Farmer, Notification, Question, Reply, Product
 import json
 import cloudinary.uploader
+from decimal import Decimal
+from .serializers import NotificationSerializer
 
 config = {
     "apiKey": "AIzaSyBFKJy-P2S8xHcB0DB5G-IUZ2hPgQ6VtEw",
@@ -292,3 +294,46 @@ def get_products(request, product_name):
     except Exception as e:
         print("Error:", str(e))
         return JsonResponse({"message": "An error occurred", "error": str(e)}, status=500)
+
+
+# buy function
+@api_view(['POST'])
+def buy(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            product_id = data.get("productId")
+            quantity = data.get('quantity')
+            seller_id = data.get('sellerId')
+            farmer_id = data.get('farmerId')
+
+            product = Product.objects.filter(id=product_id).first()
+            product.quantity -= Decimal(quantity)
+            product.save()
+
+            # Notification for each item
+            seller_id = Farmer.objects.filter(id=seller_id).first()
+            farmer_id = Farmer.objects.filter(id=farmer_id).first()
+            Notification.objects.create(
+                farmer_id=seller_id,
+                message=f"You have received order of {product.product_name} from {farmer_id.farmer_name}. Be sure to deliver the product on time. Thank you.",
+                is_read=False
+            )
+
+            return JsonResponse({"message":"Order placed successfully"}, status=200)
+
+        except Exception as e:
+            print("Error:", str(e))
+            return JsonResponse({"message": "An error occurred", "error": str(e)}, status=500)
+
+
+# get_notification api
+@api_view(['GET'])
+def get_farmer_notifications(request, farmer_id):
+    try:
+        farmer_id = Farmer.objects.get(id=farmer_id)
+        notifications = Notification.objects.filter(farmer_id=farmer_id, is_read=False).order_by('-created_at')
+        serializer = NotificationSerializer(notifications, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    except Notification.DoesNotExist:
+        return JsonResponse({'error': 'Farmer not found'}, status=status.HTTP_404_NOT_FOUND)
