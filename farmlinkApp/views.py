@@ -337,3 +337,25 @@ def get_farmer_notifications(request, farmer_id):
         return JsonResponse(serializer.data, safe=False)
     except Notification.DoesNotExist:
         return JsonResponse({'error': 'Farmer not found'}, status=status.HTTP_404_NOT_FOUND)
+
+# chatai api
+from django.http import JsonResponse
+from transformers import pipeline
+import os
+
+# Load model once
+qa_model = pipeline("question-answering", model="deepset/roberta-base-squad2")
+
+# Load the text file located in the same directory as this views.py
+CURRENT_DIR = os.path.dirname(__file__)
+context_file_path = os.path.join(CURRENT_DIR, "farming_knowledge.txt")
+
+with open(context_file_path, "r", encoding="utf-8") as f:
+    context = f.read()
+
+def ask_question(request, question):
+    if not question:
+        return JsonResponse({"error": "Please provide a question."}, status=400)
+
+    result = qa_model(question=question, context=context)
+    return JsonResponse({"question": question, "answer": result["answer"]})

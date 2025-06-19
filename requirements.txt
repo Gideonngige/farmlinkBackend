@@ -10,3 +10,5 @@ firebase-admin==6.8.0
 Pyrebase4==4.8.0
 setuptools>=65.0.0
 cloudinary==1.44.0
+transformers>=4.40.0
+torch>=2.0.0
