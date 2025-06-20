@@ -348,3 +348,49 @@ def get_farmer_notifications(request, farmer_id):
     except Notification.DoesNotExist:
         return JsonResponse({'error': 'Farmer not found'}, status=status.HTTP_404_NOT_FOUND)
 
+
+# get orders for seller
+@api_view(['GET'])
+def get_orders(request, farmer_id):
+    try:
+        farmer_id = Farmer.objects.get(id=farmer_id)
+        orders = ProductOrder.objects.filter(seller_id=farmer_id).order_by('-created_at')
+        order_list = []
+        for order in orders:
+            order_list.append({
+                'id': order.id,
+                'farmer_id':order.farmer_id.id,
+                'product_name': order.product_id.product_name,
+                'product_image': order.product_id.product_image,
+                'quantity': order.quantity,
+                'amount': str(order.amount),
+                'delivered': order.delivered,
+                'created_at': order.created_at.strftime("%Y-%m-%d %H:%M:%S")
+            })
+        return JsonResponse({"orders": order_list}, status=200)
+    except Exception as e:
+        print("Error:", str(e))
+        return JsonResponse({"message": "An error occurred", "error": str(e)}, status=500)
+
+# get orders for farmer
+@api_view(['GET'])
+def get_farmer_orders(request, farmer_id):
+    try:
+        farmer_id = Farmer.objects.get(id=farmer_id)
+        orders = ProductOrder.objects.filter(farmer_id=farmer_id).order_by('-created_at')
+        order_list = []
+        for order in orders:
+            order_list.append({
+                'id': order.id,
+                'farmer_id':order.farmer_id.id,
+                'product_name': order.product_id.product_name,
+                'product_image': order.product_id.product_image,
+                'quantity': order.quantity,
+                'amount': str(order.amount),
+                'delivered': order.delivered,
+                'created_at': order.created_at.strftime("%Y-%m-%d %H:%M:%S")
+            })
+        return JsonResponse({"orders": order_list}, status=200)
+    except Exception as e:
+        print("Error:", str(e))
+        return JsonResponse({"message": "An error occurred", "error": str(e)}, status=500)
