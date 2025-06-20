@@ -13,5 +13,4 @@ urlpatterns = [
     path('get_products/<str:product_name>/', views.get_products, name='get_products'),
     path('buy/', views.buy, name='buy'),
     path('get_farmer_notifications/<int:farmer_id>/', views.get_farmer_notifications, name='get_farmer_notifications'),
-    path('ask_question/<str:question>/', views.ask_question, name='ask_question'),
 ]
