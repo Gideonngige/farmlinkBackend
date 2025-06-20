@@ -69,4 +69,4 @@ class ProductOrder(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Order {self.id} by {self.farmer_id.name} for {self.product_id.product_name}"
+        return f"Order {self.id} by {self.farmer_id.farmer_name} for {self.product_id.product_name}"
