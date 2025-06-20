@@ -57,3 +57,16 @@ class Product(models.Model):
 
     def __str__(self):
         return f"{self.product_name} ksh{self.price} by {self.farmer_id.farmer_name}"
+
+
+class ProductOrder(models.Model):
+    product_id = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='products')
+    farmer_id = models.ForeignKey(Farmer, on_delete=models.CASCADE, related_name='product_orders_farmer', default=1)
+    seller_id = models.ForeignKey(Farmer, on_delete=models.CASCADE, related_name='product_orders_seller', default=1)
+    quantity = models.IntegerField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    delivered = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Order {self.id} by {self.farmer_id.name} for {self.product_id.product_name}"

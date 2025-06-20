@@ -4,7 +4,7 @@ import pyrebase
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Farmer, Notification, Question, Reply, Product
+from .models import Farmer, Notification, Question, Reply, Product, ProductOrder
 import json
 import cloudinary.uploader
 from decimal import Decimal
@@ -306,14 +306,24 @@ def buy(request):
             quantity = data.get('quantity')
             seller_id = data.get('sellerId')
             farmer_id = data.get('farmerId')
+            amount = data.get('amount')
 
             product = Product.objects.filter(id=product_id).first()
             product.quantity -= Decimal(quantity)
             product.save()
+ 
+
+            seller_id = Farmer.objects.filter(id=seller_id).first()
+            farmer_id = Farmer.objects.filter(id=farmer_id).first()# save the order
+            order = ProductOrder.objects.create(
+                product_id=product,
+                farmer_id=farmer_id,
+                seller_id=seller_id,
+                quantity=quantity,
+                amount=amount
+            )
 
             # Notification for each item
-            seller_id = Farmer.objects.filter(id=seller_id).first()
-            farmer_id = Farmer.objects.filter(id=farmer_id).first()
             Notification.objects.create(
                 farmer_id=seller_id,
                 message=f"You have received order of {product.product_name} from {farmer_id.farmer_name}. Be sure to deliver the product on time. Thank you.",
