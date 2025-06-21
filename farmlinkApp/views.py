@@ -420,3 +420,40 @@ def confirm_order(request, order_id):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 # end of confirm order api
+
+# start of update profile api
+@csrf_exempt
+@api_view(['POST'])
+@parser_classes([MultiPartParser])
+def updateprofile(request):
+    try:
+        farmer_id = request.data.get('farmer_id')
+        farmer_name = request.data.get('farmer_name')
+        phone_number = request.data.get('phone_number')
+        area_of_residence = request.data.get('area_of_residence')
+        profile_image = request.FILES.get('profile_image', None)
+
+        farmer = Farmer.objects.get(id=farmer_id)
+
+        if farmer_name:
+            farmer.farmer_name = farmer_name
+        if phone_number:
+            farmer.phone_number = phone_number
+        if area_of_residence:
+            farmer.area_of_residence = area_of_residence
+        
+        image_url = None
+        if profile_image:
+            upload_result = cloudinary.uploader.upload(profile_image)
+            image_url = upload_result.get("secure_url")
+            farmer.profile_image = image_url  # Assuming this is an ImageField
+
+        farmer.save()
+        return JsonResponse({"message": "ok"})
+
+    except Members.DoesNotExist:
+        return JsonResponse({"message": "Farmer not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"message": str(e)}, status=500)
+
+# end of update profile api
