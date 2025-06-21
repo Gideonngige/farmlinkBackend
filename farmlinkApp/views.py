@@ -62,7 +62,7 @@ def signup(request):
 
             notification = Notification.objects.create(
                 farmer_id=farmer,
-                message="Welcome to G-Blog! Your account has been created successfully.",
+                message="Welcome to Farm Link! Your account has been created successfully.",
                 is_read=False
             )
 
@@ -354,7 +354,7 @@ def get_farmer_notifications(request, farmer_id):
 def get_orders(request, farmer_id):
     try:
         farmer_id = Farmer.objects.get(id=farmer_id)
-        orders = ProductOrder.objects.filter(seller_id=farmer_id).order_by('-created_at')
+        orders = ProductOrder.objects.filter(seller_id=farmer_id, delivered=False).order_by('-created_at')
         order_list = []
         for order in orders:
             order_list.append({
@@ -380,7 +380,7 @@ def get_orders(request, farmer_id):
 def get_farmer_orders(request, farmer_id):
     try:
         farmer_id = Farmer.objects.get(id=farmer_id)
-        orders = ProductOrder.objects.filter(farmer_id=farmer_id).order_by('-created_at')
+        orders = ProductOrder.objects.filter(farmer_id=farmer_id, delivered=False).order_by('-created_at')
         order_list = []
         for order in orders:
             order_list.append({
@@ -397,3 +397,26 @@ def get_farmer_orders(request, farmer_id):
     except Exception as e:
         print("Error:", str(e))
         return JsonResponse({"message": "An error occurred", "error": str(e)}, status=500)
+
+
+# start of confirm order api
+@api_view(['GET'])
+def confirm_order(request, order_id):
+    try:
+        order = ProductOrder.objects.get(id=order_id)
+        order.delivered = True
+        order.save()
+
+        # Create a notification for the user
+        notification = Notification.objects.create(
+            userId=order.farmer_id,
+            message=f"Your order for {order.product_name} has been delivered successfully.Thank you for buying!",
+            is_read=False
+        )
+
+        return Response({'message': 'Order delivered successfully'}, status=200)
+    except ProductOrder.DoesNotExist:
+        return Response({'error': 'Order not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+# end of confirm order api
