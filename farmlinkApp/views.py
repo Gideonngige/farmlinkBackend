@@ -414,9 +414,9 @@ def confirm_order(request, order_id):
             is_read=False
         )
 
-        return Response({'message': 'Order delivered successfully'}, status=200)
+        return JsonResponse({'message': 'Order delivered successfully'}, status=200)
     except ProductOrder.DoesNotExist:
         return Response({'error': 'Order not found'}, status=404)
     except Exception as e:
-        return Response({'error': str(e)}, status=500)
+        return JsonResponse({'error': str(e)}, status=500)
 # end of confirm order api
