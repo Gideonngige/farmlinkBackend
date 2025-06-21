@@ -409,7 +409,7 @@ def confirm_order(request, order_id):
 
         # Create a notification for the user
         notification = Notification.objects.create(
-            userId=order.farmer_id,
+            farmer_id=order.farmer_id,
             message=f"Your order for {order.product_name} has been delivered successfully.Thank you for buying!",
             is_read=False
         )
