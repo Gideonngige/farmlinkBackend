@@ -451,7 +451,7 @@ def updateprofile(request):
         farmer.save()
         return JsonResponse({"message": "ok"})
 
-    except Members.DoesNotExist:
+    except Farmer.DoesNotExist:
         return JsonResponse({"message": "Farmer not found"}, status=404)
     except Exception as e:
         return JsonResponse({"message": str(e)}, status=500)
