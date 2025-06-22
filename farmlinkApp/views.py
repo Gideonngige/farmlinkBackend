@@ -408,9 +408,9 @@ def confirm_order(request, order_id):
         order.save()
 
         amount = order.amount * 0.85
-
+        farmer = Farmer.objects.get(id=order.seller_id)
         farmerPayment = FarmerPayment.objects.create(
-            farmer_id=order.seller_id,
+            farmer_id=farmer,
             amount=amount
         )
 
@@ -423,7 +423,7 @@ def confirm_order(request, order_id):
 
         # create a notification for the seller of payment
         notification = Notification.objects.create(
-            farmer_id=order.seller_id,
+            farmer_id=farmer,
             message=f"You have received payment of Ksh.{amount} from {order.farmer_id.farmer_name}. Thank you.",
             is_read=False
         )
