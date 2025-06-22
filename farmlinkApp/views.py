@@ -407,28 +407,35 @@ def confirm_order(request, order_id):
         order.delivered = True
         order.save()
 
-        amount = order.amount * 0.85
-        farmer = Farmer.objects.get(id=order.seller_id)
-        farmerPayment = FarmerPayment.objects.create(
-            farmer_id=farmer,
+        amount = order.amount * Decimal('0.85')
+
+        # Get related model objects directly
+        seller = order.seller_id  # This is actually the Farmer object
+        buyer = order.farmer_id   # This is also the Farmer object
+        product = order.product_id
+
+        # Create farmer payment to the seller
+        FarmerPayment.objects.create(
+            farmer_id=seller,  # this is fine — it's a ForeignKey field expecting Farmer
             amount=amount
         )
 
-        # Create a notification for the user
-        notification = Notification.objects.create(
-            farmer_id=order.farmer_id,
-            message=f"Your order for {order.product_id.product_name} has been delivered successfully.Thank you for buying!",
+        # Notify the buyer
+        Notification.objects.create(
+            farmer_id=buyer,
+            message=f"Your order for {product.product_name} has been delivered successfully. Thank you for buying!",
             is_read=False
         )
 
-        # create a notification for the seller of payment
-        notification = Notification.objects.create(
-            farmer_id=farmer,
-            message=f"You have received payment of Ksh.{amount} from {order.farmer_id.farmer_name}. Thank you.",
+        # Notify the seller
+        Notification.objects.create(
+            farmer_id=seller,
+            message=f"You have received payment of Ksh.{amount:.2f} from {buyer.farmer_name}. Thank you.",
             is_read=False
         )
 
         return JsonResponse({'message': 'Order delivered successfully'}, status=200)
+
     except ProductOrder.DoesNotExist:
         return Response({'error': 'Order not found'}, status=404)
     except Exception as e:
