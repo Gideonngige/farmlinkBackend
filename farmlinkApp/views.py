@@ -4,7 +4,7 @@ import pyrebase
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Farmer, Notification, Question, Reply, Product, ProductOrder
+from .models import Farmer, Notification, Question, Reply, Product, ProductOrder, FarmerPayment
 import json
 import cloudinary.uploader
 from decimal import Decimal
@@ -407,10 +407,24 @@ def confirm_order(request, order_id):
         order.delivered = True
         order.save()
 
+        amount = order.amount * 0.85
+
+        farmerPayment = FarmerPayment.objects.create(
+            farmer_id=order.seller_id,
+            amount=amount
+        )
+
         # Create a notification for the user
         notification = Notification.objects.create(
             farmer_id=order.farmer_id,
             message=f"Your order for {order.product_id.product_name} has been delivered successfully.Thank you for buying!",
+            is_read=False
+        )
+
+        # create a notification for the seller of payment
+        notification = Notification.objects.create(
+            farmer_id=order.seller_id,
+            message=f"You have received payment of Ksh.{amount} from {order.farmer_id.farmer_name}. Thank you.",
             is_read=False
         )
 
