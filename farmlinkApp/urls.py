@@ -5,6 +5,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('signup/', views.signup, name='signup'),
     path('signin/', views.signin, name='signin'),
+    path('reset_password/<str:email>/', views.reset_password, name='reset_password'),
     path('question/', views.question, name='question'),
     path('get_questions/', views.get_questions, name='get_questions'),
     path('reply/', views.reply, name='reply'),

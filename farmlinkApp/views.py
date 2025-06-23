@@ -113,6 +113,18 @@ def signin(request):
     return JsonResponse({"message": "Invalid request method"}, status=405)
 #end of signin api
 
+# reset password api
+@api_view(['GET'])
+def reset_password(request, email):
+    try:
+        authe.send_password_reset_email(email)
+        message = "A email to reset password is successfully sent"
+        return JsonResponse({"message": message})
+    except:
+        message = "Something went wrong, Please check the email, provided is registered or not"
+        return JsonResponse({"message": message})
+#end of reset api
+
 # start of question api
 @csrf_exempt
 @api_view(['POST'])
