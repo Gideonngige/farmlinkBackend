@@ -18,4 +18,5 @@ urlpatterns = [
     path('get_farmer_orders/<int:farmer_id>/', views.get_farmer_orders, name='get_farmer_orders'),
     path('confirm_order/<int:order_id>/', views.confirm_order, name='confirm_order'),
     path('updateprofile/', views.updateprofile, name='updateprofile'),
+    path('send_expo_token/<int:farmer_id>/<str:expo_token>/', views.send_expo_token, name='send_expo_token'),
 ]

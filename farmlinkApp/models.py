@@ -16,6 +16,7 @@ class Farmer(models.Model):
     password = models.CharField(max_length=100)
     profile_image = models.URLField(max_length=200, blank=True, null=True, default='https://res.cloudinary.com/dc68huvjj/image/upload/v1748119193/zzy3zwrius3kjrzp4ifc.png')
     date_joined = models.DateTimeField(auto_now_add=True)
+    expo_token = models.CharField(max_length=200, default="qOE08EA5OCq-yL323EhTY8")
 
     def __str__(self):
         return f"{self.farmer_name} ({self.area_of_residence})"

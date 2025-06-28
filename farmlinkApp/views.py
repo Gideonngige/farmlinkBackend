@@ -9,6 +9,7 @@ import json
 import cloudinary.uploader
 from decimal import Decimal
 from .serializers import NotificationSerializer
+import requests
 
 config = {
     "apiKey": "AIzaSyBFKJy-P2S8xHcB0DB5G-IUZ2hPgQ6VtEw",
@@ -308,6 +309,29 @@ def get_products(request, product_name):
         return JsonResponse({"message": "An error occurred", "error": str(e)}, status=500)
 
 
+
+# semd push notification to phne
+EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send"
+
+def send_push_notification(token, title, body, data=None):
+    if not token:
+        return {"error": "No push token provided."}
+
+    message = {
+        "to": token,
+        "sound": "default",
+        "title": title,
+        "body": body,
+        "data": data or {},
+    }
+
+    try:
+        response = requests.post(EXPO_PUSH_URL, json=message)
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        return {"error": str(e)}
+
+
 # buy function
 @api_view(['POST'])
 def buy(request):
@@ -326,6 +350,7 @@ def buy(request):
  
 
             seller_id = Farmer.objects.filter(id=seller_id).first()
+            seller_token = seller_id.expo_token
             farmer_id = Farmer.objects.filter(id=farmer_id).first()# save the order
             order = ProductOrder.objects.create(
                 product_id=product,
@@ -340,6 +365,13 @@ def buy(request):
                 farmer_id=seller_id,
                 message=f"You have received order of {product.product_name} from {farmer_id.farmer_name}. Be sure to deliver the product on time. Thank you.",
                 is_read=False
+            )
+
+            seller_response = send_push_notification(
+                seller_token,
+                title="New Order Received",
+                body=f"You have received order of {product.product_name} from {farmer_id.farmer_name}. Be sure to deliver the product on time. Thank you.",
+                data={"order_id": order.id}
             )
 
             return JsonResponse({"message":"Order placed successfully"}, status=200)
@@ -490,3 +522,19 @@ def updateprofile(request):
         return JsonResponse({"message": str(e)}, status=500)
 
 # end of update profile api
+
+# send expo_token
+def send_expo_token(request, farmer_id, expo_token):
+    try:
+        farmer = Farmer.objects.get(id=farmer_id)
+        farmer.expo_token = expo_token
+        farmer.save()
+        return JsonResponse({"message":"Token saved successfully"})
+
+    except Farmer.DoesNotExist:
+        return JsonResponse({"message": "Farmer not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"message": str(e)}, status=500)
+
+
+

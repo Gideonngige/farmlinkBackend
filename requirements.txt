@@ -11,3 +11,4 @@ Pyrebase4==4.8.0
 setuptools>=65.0.0
 cloudinary==1.44.0
 whitenoise>=6.0
+requests
