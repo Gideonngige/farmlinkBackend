@@ -318,10 +318,10 @@ def send_push_notification(token, title, body, data=None):
         return {"error": "No push token provided."}
 
     message = {
-        "to": token,
+        "to": f"{token}",
         "sound": "default",
-        "title": title,
-        "body": body,
+        "title": f"{title}",
+        "body": f"{body}",
         "data": data or {},
     }
 
@@ -366,7 +366,7 @@ def buy(request):
                 message=f"You have received order of {product.product_name} from {farmer_id.farmer_name}. Be sure to deliver the product on time. Thank you.",
                 is_read=False
             )
-
+            print(seller_token)
             seller_response = send_push_notification(
                 seller_token,
                 title="New Order Received",
