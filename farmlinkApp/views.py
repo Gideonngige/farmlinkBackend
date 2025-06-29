@@ -453,22 +453,22 @@ def confirm_order(request, order_id):
 
         amount = order.amount * Decimal('0.85')
 
-        seller = order.seller       # Farmer object
-        buyer = order.farmer        # Farmer object
-        product = order.product     # Product object
+        seller = order.seller_id       # Farmer object
+        buyer = order.farmer_id        # Farmer object
+        product = order.product_id     # Product object
 
         seller_token = seller.expo_token
         buyer_token = buyer.expo_token
 
         # Create FarmerPayment
         FarmerPayment.objects.create(
-            farmer=seller,
+            farmer_id=seller,
             amount=amount
         )
 
         # Notify buyer
         Notification.objects.create(
-            farmer=buyer,
+            farmer_id=buyer,
             message=f"Your order for {product.product_name} has been delivered successfully. Thank you for buying!",
             is_read=False
         )
@@ -481,7 +481,7 @@ def confirm_order(request, order_id):
 
         # Notify seller
         Notification.objects.create(
-            farmer=seller,
+            farmer_id=seller,
             message=f"You have received payment of Ksh.{amount:.2f} from {buyer.farmer_name}. Thank you.",
             is_read=False
         )
