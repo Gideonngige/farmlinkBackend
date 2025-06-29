@@ -457,6 +457,10 @@ def confirm_order(request, order_id):
         seller = order.seller_id  # This is actually the Farmer object
         buyer = order.farmer_id   # This is also the Farmer object
         product = order.product_id
+        seller_id = Farmer.objects.get(id=seller)
+        seller_token = seller_id.expo_token
+        buyer_id = Farmer.objects.get(id=buyer)
+        buyer_token = buyer_id.expo_token
 
         # Create farmer payment to the seller
         FarmerPayment.objects.create(
@@ -470,12 +474,24 @@ def confirm_order(request, order_id):
             message=f"Your order for {product.product_name} has been delivered successfully. Thank you for buying!",
             is_read=False
         )
+        buyer_response = send_push_notification(
+            buyer_token,
+            title="New Order Received",
+            body=f"Your order for {product.product_name} has been delivered successfully. Thank you for buying!",
+            data={"order_id": order.id}
+        )
 
         # Notify the seller
         Notification.objects.create(
             farmer_id=seller,
             message=f"You have received payment of Ksh.{amount:.2f} from {buyer.farmer_name}. Thank you.",
             is_read=False
+        )
+        seller_response = send_push_notification(
+            seller_token,
+            title="New Order Received",
+            body=f"You have received payment of Ksh.{amount:.2f} from {buyer.farmer_name}. Thank you.",
+            data={"order_id": order.id}
         )
 
         return JsonResponse({'message': 'Order delivered successfully'}, status=200)
