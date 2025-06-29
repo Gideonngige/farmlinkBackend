@@ -492,12 +492,12 @@ def confirm_order(request, order_id):
             data={"order_id": order.id}
         )
 
-        return Response({'message': 'Order delivered successfully'}, status=200)
+        return JsonResponse({'message': 'Order delivered successfully'}, status=200)
 
     except ProductOrder.DoesNotExist:
-        return Response({'error': 'Order not found'}, status=404)
+        return JsonResponse({'error': 'Order not found'}, status=404)
     except Exception as e:
-        return Response({'error': str(e)}, status=500)
+        return JsonResponse({'error': str(e)}, status=500)
 # end of confirm order api
 
 # start of update profile api
